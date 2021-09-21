@@ -1,0 +1,917 @@
+\documentclass{article} % use \documentstyle for old LaTeX compilers
+
+\usepackage[english]{babel} % 'french', 'german', 'spanish', 'danish', etc.
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{txfonts}
+\usepackage{mathdots}
+\usepackage[classicReIm]{kpfonts}
+\usepackage{graphicx}
+
+% You can include more LaTeX packages here 
+
+
+\begin{document}
+
+%\selectlanguage{english} % remove comment delimiter ('%') and select language if required
+
+
+\noindent Page {\textbar} 2
+
+\noindent 
+
+\noindent \textbf{Automatic Feature grouping in high dimension penalized grouping}
+
+\noindent \textbf{}
+
+\noindent \textbf{Abstract}
+
+\noindent \textit{In learning with data which is high dimensional, the grouping of characteristics is quite useful. It improves feature selection stability and reduces estimation variance, resulting in better generalization. It assists with data interpretation as well as comprehension. OSCAR is a sparse modelling tool that does this by combining an L1 regularizer with a pairwise L$\infty$ regularizer. Oscar is a tool for selecting variables and arranging them into prediction clusters at the same time. In addition to increasing the accuracy of predictions and interpretation. The purpose of this study is to compare OSCAR to ridge, lasso, elastic-net, group lasso, and linear regression models to see which one works best as demonstrated by experimental results on a simulated and soil data.}
+
+\noindent 
+
+\noindent \textbf{Introduction}
+
+\noindent The term "high dimensional" refers to a situation in which the number of dimensions is staggeringly large, making calculations extremely difficult. The number of characteristics in high-dimensional data can outnumber the number of observations. The common thread running through these issues is that when dimensionality rises, the volume of space expands rapidly, that the accessible data becomes sparse. The amount of data required to produce a statistically valid and credible result sometimes climbs exponentially as the dimensionality increases. Data is rarely distributed randomly in high-dimensions and is highly correlated, with misleading correlations typical. In high dimensions, the distances between a data point and its closest and farthest neighbors can become equidistant, possibly jeopardizing the accuracy of some distance-based analytic techniques. Datasets for high-dimensional data are often unstructured, which might make them more challenging to use. Furthermore, large datasets can contain noise and uncertainties. It can be challenging to process and apply practical data mining tools to such noisy data.
+
+\noindent When you add more variables to a multivariate model, you get what is known as the curse of dimensionality. The more dimensions you add to a data set, the harder it becomes to anticipate specific values. You would think that having more is better. When it comes to introducing variables, on the other hand, the converse is true. Each additional variable reduces the prediction power exponentially. The term "dimensionality reduction" refers to the process of making data easier to comprehend, either numerically or graphically. The integrity of the data is preserved. You might use a technique like multidimensional scaling to detect commonalities in data to minimize dimensionality by combining related data into groups. Clustering can also be used to group items together. 
+
+\noindent This study aimed to identify the approaches used to manage high-dimensional data and determine which one performs best in terms of accuracy or error rate. What made one method preferable to the other, and why? In the literature, such strategies have been thoroughly explained. For example, ridge and lasso regression [1] use penalization to minimize features near to 0 or precisely zero. Which are model tuning strategies that can be applied to multicollinear data analysis? 
+
+\noindent The data is a study about correlations betwixt soil parameters and forest diversity in North Carolina's Appalachian Mountains, and each of these approaches was applied separately on a soil dataset with 15 predictors and 20 samples.
+
+\noindent The rest of the manuscript is organized in the same way section 2 does, including a literature review. Section 3 goes over the methodologies, section 4 explaining simulation results, while section 5 goes through the dataset and its characteristics correlation. The final section evaluates and discusses the findings.
+
+\noindent \textbf{Related Literature}
+
+\noindent When fitting a multiple regression model to a dataset, the p-value and analysis of the variance table are used to determine how significant our model is. The second most significant factor in determining which predictors are the most important and the least important; therefore, researchers have had difficulty selecting a set of best predictors to include in their models. Variable selection is the process of selecting the best predictors from a pool of all available predictors.
+
+\noindent As fitting a model on high dimensional data, such as when n approaches p, where n is the number of samples and p is the number of predictors, numerous studies have been conducted to deal with variable selection.
+
+\noindent The most widely used sparse modeling algorithm is Lasso [1]. In the presence of most associated traits, however, it prefers to choose only one. As a result, estimation might be unreliable, and the resulting model can be challenging to understand.
+
+\noindent Another flaw with Lasso [1] is that it is unable to locate feature groupings. Feature grouping can diminish estimator variance [2] and increase feature selection stability [3]. It also aids the discovery of co-regulated genes in microarray analysis [4]. This differs from the group lasso [7], which necessitates prior knowledge of the feature groups.
+
+\noindent A combinatorial optimization challenge is a detailed search for feature groups. Instead, an adequate regularizer might be used to stimulate its development. The elastic net [5] is a well-known technique. The fused Lasso [6] explicitly encourages the successive feature coefficients to be comparable in circumstances where the features are organized in some meaningful way. However, such an ordering is not always present and must be predicted before the fused Lasso [6] can be employed.
+
+\noindent The elastic net [5] approach is used to make regularization and variable selection on real-world data. A simulation shows how it outperforms the Lasso Regression [1] in providing a grouping effect for predictors that are highly associated with one another. When the number of predictors p is substantially more than the number of samples n, this strategy comes in handy.
+
+\noindent OLS is very well recognized for its poor performance in both forecasting and understanding. To strengthen OLS, penalization approaches have been proposed. For instance, Ridge regression [18] reduces the leftover sum of the squares according to a limit on the variables' L2-norm. Ridge regression, as a continuum downsizing technique, achieves superior predictive accuracy via a bias-variance exchange. It cannot build a precise model because it always retains all variables in the model. In comparison, optimal group selection provides a scant model, but it is exceedingly variable due to its inherent discreteness, as Breiman points out in [19].
+
+\noindent A comparable study using OSCAR [8] picks the features by making cluster groups achieve maximum precision for test data, illustrating predictor choice and their clustering. This method uses penalized least squares and a punishment function to reduce coefficients to zero. Furthermore, this penalty function generates comparable coefficients for some predictors with similar predictions, resulting in predictive clusters. In terms of prediction accuracy and model complexity, this study compares existing variable selection strategies with OSCAR's [8] supervised clustering of predictors, which adds automatic feature grouping to reveal additional grouping information. This was done using a simulation as well as real-world soil data.
+
+\noindent This research focuses on efficient sparse modeling using automatic feature grouping [9], highlighting the benefits of feature grouping in high-dimensional data, enhancing feature selection, and reducing variance, resulting in a generalized model. This research employs accelerated gradient methods to demonstrate how the critical projection in OSCAR [8] can be addressed using a simple iterative group merging algorithm that decreases the time complexity. This has been demonstrated on both toy and real-world data to show that OSCAR [8] is a competitive sparse modeling strategy that can do automatic feature grouping.
+
+\noindent The RMSE has been utilized as a standard statistical tool to evaluate the abovementioned methodologies' predictive accuracy. Another relevant measure is MAE. Even though they have both been used to evaluate the performance of a model for several years, there is no agreement on which metric is the best suitable for model uncertainty. Because the Root means the square error is widely used as benchmark measurement for model uncertainty in the environmental sciences discussed in McKeen et al. [20], Savage et al. [21] \& Chai et al. [22], we chose it as the performance appraisal metric for this study.
+
+\noindent All of the techniques mentioned above focus on real-world data while studying variable selection on high-dimensional data. This study is based on soil data from research on correspondence between soil properties and forest variety in North Carolina's Mountains. There were no comparisons made with the results of other research studies, but comparisons were made on this soil dataset with the OSCAR [8] method for Multi-Linear Regression, Lasso [1], Ridge, Elastic-net, group lasso [7], and fused lasso [6]. Results were drawn, which are available in the literature.
+
+\noindent \textbf{Methodology}
+
+\noindent \textbf{Regression?}
+
+\noindent Regression is the study of the relationships between variables or features in data such as one may be able to predict the value of the unknown variable for some know variables. In regression, the target variable or the variable to be predicted is known as the dependent variable, and the other variables are independent. The predictions are an estimate produced by the regression model based on some features. As a result, regression is a metric for determining the average relationship between variables. It can be used to measure mutual relationships by regression analysis. Regression analysis is helpful in business and economic research, which can also help to form policies. The nature of its relationship between variables is based on correlation, which measures the degree of relationship between X and Y. Whereas the correlation does not help make predictions, regression gives us that ability. The connection between the reliant and autonomous factors is inspected utilizing relapse investigation, a prescient displaying method. 
+
+\noindent The initial application of regression analysis is evaluating the strength of predictors. Regression can be used to determine the strength of an individualistic variable's effect on the reliant variable, such as the robustness of correspondence between sales and marketing spending or the association between age and income. Second, forecasting and effect can be used to forecast effects for the impact of changes, i.e., regression analysis can assist us to understand how much the reliant features change when one or more individualistic features change. 
+
+\noindent In simple linear regression, data is modeled using a straight line, used with continuous variables, and measured by loss, R-squared, etc.
+
+\noindent \textbf{Regularization?}
+
+\noindent It is a technique used to penalize the model for the overfitting of data and adding the parameter. As a result, it tunes the model for a better outcome. A model that is fitted on some training data may give zero error for training, but when it is testes against the testing data, huge errors are observed compared to actual values so to deal with this situation regularization tunes the function by adding a penalty to the error function. Now, this penalty will be used to shrink the coefficients in order to reduce the error. This overfitting can also be controlled by increasing the size of the dataset, which means converting high dimensional data to low dimensional data.
+
+\noindent 
+
+\noindent \textbf{Bias and Variance}
+
+\noindent In statistics, the bias and variance of estimators are two important properties to examine. The disparity betwixt the true population criterion and the predicted reckoner is known as bias.
+\begin{equation} \label{GrindEQ__1_} 
+Bias\left(\widehat{{\beta }_{OLS}}\right)=E\left(\widehat{{\beta }_{OLS}}\right)-\beta  
+\end{equation} 
+It assesses the accuracy of the estimators. The dispersion, or uncertainty, in these estimates is measured by variance. 
+\begin{equation} \label{GrindEQ__2_} 
+Var\left(\widehat{{\beta }_{OLS}}\right)=\ {\sigma }^2{\left(\acute{X}X\right)}^{-1} 
+\end{equation} 
+The residuals can be used to estimate the unknown error in variance
+\[{\widehat{\sigma }}^2=\ \frac{\acute{e}e}{n-m}\] 
+\begin{equation} \label{GrindEQ__3_} 
+e=y-X\widehat{\beta } 
+\end{equation} 
+Fig. 1 depicts how variance and bias can be visually displayed. Consider the red circle to be the literal population criterion we're trying to estimate, $\betaup$, and the values of our estimations arising from four distinct estimators are the shots at it.
+
+\noindent \includegraphics*[width=3.17in, height=2.98in, keepaspectratio=false]{image1}
+
+\noindent \textit{Fig. 1 Bias and Variance}
+
+\noindent 
+
+\noindent Variance \& bias should be minimal, as substantial values out-turn in defective model predictions. The fallacy withinside the version may be divided into 3 categories: fallacy because of a huge variation, fallacy because of robust bias, and the rest.
+\begin{equation} \label{GrindEQ__4_} 
+E\left(e\right)={\left(E\left(X\widehat{\beta }\right)-X\beta \right)}^2+{E(X\widehat{\beta }-E(X\widehat{\beta }))}^2+{\sigma }^2=\ {Bias}^2+Variance+{\sigma }^2 
+\end{equation} 
+The unbiased property of the OLS estimator is a desirable feature. However, there might be a lot of variation. This occurs, for example, when the predictor variables have a high degree of correlation. There is a plethora of predictors. The above-mentioned variance formula \eqref{GrindEQ__3_} reflects this: as m gets close to n, the variance addresses to infinity. The typical method to this hassle is to lessen variation on the rate of bias. This technique is called regularization, and it's far clearly beneficial to the model's prediction performance.
+
+\noindent \includegraphics*[width=4.78in, height=3.00in, keepaspectratio=false]{image2}
+
+\noindent \textit{Fig. 2 Plot of Model Complexity against Error}
+
+\noindent The change of evaluations develops as the model intricacy, which on account of straight relapse can be considered the number of predictors, increments, while the inclination lessens. The impartial OLS would put us on the right half of the diagram, which is not great. This is why we use regularization to decrease variety to the detriment of some inclination, consequently moving left on the diagram and closer to the ideal.
+
+\noindent We have concluded that we would like to reduce model complexity, or the number of predictors, based on our conversation thus far. We could do this using forward or backward selection, but we would not know anything about the effect of the deleted variables on the response. Setting the coefficients of predictors to zero can be thought of as removing them from the model. Maybe than requesting them to be zero, we ought to rebuff them in case they are excessively far from nothing, consequently driving them to be little endlessly. We can decrease model intricacy while keeping all factors in the model. Ridge Regression [13] essentially does this.
+
+\noindent 
+
+\noindent \textbf{Ridge Regression}
+
+\noindent \textit{Ridge regression}~is a model tuning technique that can be used to analyze data with multicollinearity. L2 regularization is achieved using this method. When there is a problem with multicollinearity, least-squares are unbiased, and variances are significant, the projected values are far from the actual values. Its primary purpose is to generate a model that could generalize patterns that work best on training and testing datasets. Overfitting occurs when the model performs well on the training dataset but poorly on the testing dataset, so here, ridge regression [13] works by applying a penalization such as reducing the bias and variance to overcome overfitting.~
+
+\noindent In Ridge regression, the OLS loss function reduces variable guesses to zero by minimizing the sum error terms and penalizing the magnitude of parameter estimates.
+
+\noindent 
+\begin{equation} \label{GrindEQ__5_} 
+L_{ridge}\left(\widehat{\beta }\right)=\sum^n_{i=1}{{\left(y_i-x_i\widehat{\beta }\right)}^2+\lambda \sum^m_{j=1}{\widehat{{\beta }^2_j}={\left\|y-X\widehat{\beta }\right\|}^2}}+\lambda {\left\|\widehat{\beta }\right\|}^2 
+\end{equation} 
+Solving for $\betaup$$\mathrm{\wedge}$ will give the ridge regression estimates for the coefficients 
+\begin{equation} \label{GrindEQ__6_} 
+{\beta }^{ridge}=\left(X'X\ +\ \lambda I\right)-1(X'Y) 
+\end{equation} 
+\textit{I = identity matrix}
+
+\noindent \textit{$\lambda$ = regularization penalty.}
+
+\noindent \textit{As $\lambda$$\to$0, $\beta$$\wedge$ridge$\to$$\beta$$\wedge$OLS;}
+
+\noindent \textit{As $\lambda$$\to$$\infty$, $\beta$$\wedge$ridge$\to$0.}
+
+\noindent As a result, setting lambda to 0 has the same impact as employing the OLS, whereas increasing lambda increases penalization.
+
+\noindent Setting lambda to 0 is equivalent to employing the OLS, whereas increasing its value penalizes the size of the coefficients more.
+
+\noindent \textbf{Advantages of Ridge Regression}
+
+\noindent Ridge Regression eliminates overfitting, which occurs when regular squared error regression fails to distinguish the less significant features and uses them all, resulting in overfitting. It adds a slight bias to the model to fit it to its actual values, so it does not need unbiased appraisers. Ridge regression is crucial when the set of instances exceeds the training data since it outperforms the traditional summation of squares technique. The ridge estimator is exceptionally good at enhancing the least-squares approximation when multi-collinearity is present. They add just enough bias to produce the estimates approximations of genuine population values that are reasonably dependable. When there is multicollinearity, the ridge estimator is preferable for improving the least-squares estimate.
+
+\noindent \textbf{Disadvantages of Ridge Regression}
+
+\noindent Ridge regression, while enhancing test accuracy, employs all of the dataset's input features instead of stepwise approaches, which only use a few key variables for regression. If the feature is not essential, ridge regression decreases the coefficients theta to shallow values, but it will not eliminate them; therefore, we will keep it in our model. This flaw is overcome by using Lasso regression [1]. In the closing model, they include all of the predictors, so it cannot make feature choices. They make the coefficients less and smaller until they reach zero. They give up variation in exchange for bias.
+
+\noindent \textbf{Lasso Regression}
+
+\noindent Lasso regression is a technique of linear regression that is centered on contraction. In shrinkage, statistical measures are condensed towards a critical premise, such as the average. The lasso technique favors simple, sparse models, such as those with a small number of features. This sort of extrapolation is appropriate for systems with high multicollinearity or for automating parts of the model recruitment process like selecting features and variable removal. In Lasso [1], L1 regularization is utilized, and it adds a penalty equal to the values of the coefficients, which means it can completely shrink some coefficients to 0. This type of generalization can result in scant systems, with more significant penalties resulting in calculated values near to 0, which is ideal for basic models.
+
+\noindent On the other hand, L2 regularization does not lead to the loss of variables or weak models. As a consequence, the Lasso is far more straightforward to comprehend than the Ridge. Lasso regression objective is to minimize
+
+\noindent 
+\begin{equation} \label{GrindEQ__7_} 
+\sum^n_{i=1}{{\left(y_i-\sum_j{x_{ij}{\beta }_j}\right)}^2}+\lambda \sum^p_{j=1}{\left|{\beta }_j\right|} 
+\end{equation} 
+Lambda is a tuning parameter that determines how strong the L1 penalty is. When lambda is set to 0, no parameters are removed. The result is the same as that obtained using linear regression. More and more coefficients are assigned to zero and removed as lambda grows. Bias grows as lambda increases and variance grows as lambda decreases.
+
+\noindent \textbf{Advantages of Lasso Regression}
+
+\noindent It can avoid overfitting, just like any other regularization method. Even if the number of characteristics exceeds the number of data, it can be used. It has the ability to select features and in terms of inference and fitting, it is quick.
+
+\noindent \textbf{Disadvantages of Lasso Regression}
+
+\noindent The lasso-selected model is not stable. The feature is chosen on separate bootstrapped data, for example, can be significantly different. The model selection outcome is difficult to comprehend: why, such as did lasso select a feature? When there are many highly linked traits, lasso may choose one or a subset of them randomly. The outcome is determined by how well the plan is implemented. People introduced elastic net [5] to improve things. In terms of use, the prediction performance of lasso is inferior to that of Ridge regression.
+
+\noindent \textbf{Elastic-Net Regression}
+
+\noindent The elastic net [5] is a penalizing regression analysis framework that incorporates the L1 and L2 penalties during training. The hyperparameter "alpha" is used to determine how much weight each L1 and L2 penalty is given. The impact of the L1 penalty is valued by one minus the alpha value, whereas the impact of the L2 penalty is valued via one minus that alpha value. An alpha of 0.5, for example, would give each penalty a 50\% contribution to the loss function. An alpha value of 0 provides the L2 penalty total weight, while a value of 1 gives the L1 penalty total weight. Elastic net [5] permits a balance of both penalties, which might result in a more excellent performance on particular tasks than a model with only one penalty. Another hyperparameter called "lambda" regulates how the total of both penalties is weighted in the loss function. With a value of 1, the entirely weighted punishment is imposed by default; with 0, the punishment is not applied. Lambda values of 1e-3 or even below are relatively common.
+
+\noindent The coefficients to the variables are essential information; nevertheless, ridge regression [13] does not guarantee that all irrelevant coefficients will be removed, which is one of its shortcomings over Elastic Net Regression [5]. It employs Lasso [1] and Ridge Regression regularization to eliminate any non-informative coefficients while leaving the informative ones. The ENR equation is represented as 
+\begin{equation} \label{GrindEQ__8_} 
+\frac{1}{N}\sum^N_{i=1}{{\left(y_i-(mx_i+z)\right)}^2+\ }\ \lambda \sum^p_{i=1}{{\left(mx_i+z\right)}^2+\lambda \sum^p_{i=1}{\left(mx_i+z\right)}\ } 
+\end{equation} 
+\textbf{Advantages of Elastic-Net Regression}
+
+\noindent For n$\mathrm{<}$$\mathrm{<}$p, there is no difficulty picking more than n predictors, however, lasso [1] saturates. Elastic Net combines lasso and ridge properties. Elastic Net lowers the influence of many features but not eliminating them. Elastic Net is thought to be superior to Ridge and Lasso regression in terms of bias handling. Collinearity is better handled by Elastic Net than by combining ridge and lasso regression. As far as complexity is concerned, Elastic Net outperforms ridge and lasso regression because the number of variables is not significantly reduced. Elastic Net permits a balance of both penalties, which might result in more excellent performance on tasks than a model with only one penalty
+
+\noindent 
+
+\noindent \textbf{Disadvantages of Elastic-Net Regression}
+
+\noindent LASSO \& Ridge's combination is more computationally intensive.
+
+\noindent 
+
+\noindent \textbf{Group-Lasso Regression}
+
+\noindent The grouped lasso is an expansion of the lasso in linear regression models that allows for selecting features on predefined sets of items. The estimates have an appealing virtue of being GroupWise orthogonal reparameterization invariant. For accurate regression prediction, selecting grouped variables from is dataset is the main objective of group lasso. Instead of using stepwise backward elimination to pick factors, we focus on estimation accuracy and investigate lasso, LARS, and non-negative garrote extensions for feature selection. 
+
+\noindent For a vector $\etaup$ $\mathrm{\in }$ R$\mathrm{\wedge}$d, d $\mathrm{>}$=1, and a symmetric d$\mathrm{\times}$d positive definite matrix K: 
+\[\left\|n\right\|K={\left(\acute{nKn}\right)}^{\frac{1}{2}}\] 
+The solution to provided positive definite vectors K1 to KJ is known as the grouped lasso approximation. 
+\begin{equation} \label{GrindEQ__9_} 
+\frac{1}{2}{\left\|Y-\sum^J_{j=1}{X_j{\beta }_j}\right\|}^2+\ \lambda \sum^J_{j=1}{\left\|{\beta }_j\right\|}K_j 
+\end{equation} 
+where $\lambdaup$ $\mathrm{>}$= 0 is a tuning parameter.
+
+\noindent [11] presented expression \eqref{GrindEQ__9_} as a lasso extension for picking groups of variables, along with a computational algorithm.
+
+\noindent \includegraphics*[width=3.72in, height=4.31in, keepaspectratio=false, trim=0.00in 0.15in 0.00in 0.00in]{image3}
+
+\noindent \textit{Fig. 3 (a)-(d) l1 penalty, (e)-(h) group lasso penalty, (i)-(l) l2 penalty}
+
+\noindent 
+
+\noindent [17] Took a similar method, selecting~\textit{Xj}~and~\textit{Kj}~as kernel functions and replicating kernel of the 2d matrix generated by~\textit{the jth}~factor, respectively. When~\textit{p1}~to~\textit{PJ =1}, it is evident that equation \eqref{GrindEQ__9_} simplifies to the lasso. The penalty function employed in expression \eqref{GrindEQ__9_} is a hybrid of lasso's l1-penalty and ridge regression's l2-penalty. In the case where all~\textit{Kjs}~are identity matrices, this is shown in Fig. 3. The above expression causes lasso to be reduced when~\textit{p1 = PJ = 1}, an intermediate penalty function between l1 and l2. The figure tells us that all~\textit{Kjs}~are identity matrices.
+
+\noindent Look at the case when there are two components and the values are two-vector~\textit{$\beta$1 = ($\beta$11, $\beta$12)'}~and a scalar~\textit{$\beta$2}. The contour of the penalty functions is depicted in Figures 1(a), 1(e), and 1(i). The l1-penalty is depicted in Figure 3(a).~\textit{{\textbar}$\beta$11{\textbar}+{\textbar}$\beta$12{\textbar}+{\textbar}$\beta$2{\textbar} = 1}. Fig. 3(e) depicts~\textit{{\textbar}{\textbar}$\beta$1{\textbar}{\textbar} + {\textbar}$\beta$2{\textbar} = 1}~and Fig. 3(i) corresponding to~\textit{{\textbar}{\textbar} ($\beta$ 1, $\beta$2) `{\textbar}{\textbar} = 1}. The intersections of the contours with planes~\textit{$\beta$12 = 0}~\textit{(or $\beta$11 = 0),}~\textit{$\beta$2 = 0 and $\beta$11 = $\beta$12}~are represented in Figs 3(b), (d), (f), (h), (j), 1(l). The l1-penalty handles the 3 co-ordinate directions differently than other directions, which favors individual coefficient sparsity. At the factor level, the group lasso encourages sparsity.
+
+\noindent [11] suggested a sequential expression optimization technique \eqref{GrindEQ__9_}. A more intuitive technique was made. Group lasso implementation was based on the shooting algorithm [12] for the lasso. The algorithm has been proven reasonably stable, achieving a reasonable convergence tolerance after a few rounds. However, as the number of predictors grows, the computational overhead increases rapidly.
+
+\noindent 
+
+\noindent \textbf{Advantages of Group Lasso Regression}
+
+\noindent Group lasso is excellent at picking individual variables, their group counterparts are better at identifying factors. When the total features exceed the size of samples, group lasso is used directly.
+
+\noindent \textbf{Disadvantages of Group Lasso Regression}
+
+\noindent It has a slow computation and because its solution path is not piecewise linear, it necessitates extensive computing in large-scale problems.
+
+\noindent 
+
+\noindent \textbf{Fused Lasso Regression}
+
+\noindent The fused lasso [6] is a generalization technique used for issues involving characteristics that can be sorted in some meaningful fashion. The fused lasso [6] penalizes the L1-norm of parameters and their successive variances. As a result, it promotes the sparsity of the coefficients and the sparsity of their differences. When the size of predictors is substantially more than the sample size, fused lasso comes in handy. The technique is also used to the support vector classifier's underlying 'hinge' loss function. To show the approaches, we use data from protein mass spectrometry and gene expression.
+
+\noindent Starting with just a simple linear model:
+\[y_i=\ \sum_j{x_{ij}{\beta }_j+{\varepsilon }_i}\] 
+Errors with a sustained variance and 0 means. We should emphasize that p can be larger than N, and in most of the instances we investigate, it is substantially larger than N. Ridge regression [13] is one of many normalized or penalizing regression algorithms developed. partial least squares [14], and principal components regression [13]. The lasso [1] is an alike ridge, but instead of using the squares of coefficients, it employs absolute coefficients. The lasso finds the coefficients to satisfy.
+\begin{equation} \label{GrindEQ__10_} 
+\widehat{\beta }={\mathrm{arg} min\left\{\sum_i{{\left(y_i-\sum_j{x_{ij}{\beta }_j}\right)}^2}\right\}\ \ subject\ to\ \sum_j{\left|{\beta }_j\right|\le s}\ } 
+\end{equation} 
+We get the least - square result, or some of the possible least - honest answers, when s is large enough. The solutions are sparse for smaller values of s; for example, few attributes are 0. From the standpoint of data analysis, this is desirable since it picks the most important variables while eliminating the remainder. Partial least squares, main components, and ridge regression, unlike the lasso, do not yield scant models. Although group choice yields scant models, it is not a convergent operation; optimal subset selection is combinative and not feasible for~\textit{p $>$ 30}. The lasso can be employed even if~\textit{p $>$ N}, but if no two predictors are completely collinear, this has an optimal solution. The fact that the number of non-zero coefficients is at most min (N, p) is an intriguing property of the solution. If p = 40 000 and N = 100, the solution will have at most 100 non-zero coefficients. The 'basis pursuit' signal estimation approach, proposed by [15], uses the same notion as lasso but in the spectrum or other dimensions. In this case, one downside of the lasso is that it overlooks feature ordering of what we would expect. Fused lasso is suggested by:
+\begin{equation} \label{GrindEQ__11_} 
+\beta ={\mathrm{arg} min\left\{\sum_i{{\left(y_i-\sum_j{x_{ij}}{\beta }_j\right)}^2}\right\}\ }\ subject\ to\ \sum^p_{j=1}{\left|{\beta }_j\right|\le s1}\ and\ \sum^p_{j=2}{\left|{\beta }_j-{\beta }_{j-1}\right|\le s2}\  
+\end{equation} 
+The first restriction promotes sparsity in the coefficients, while the second promotes sparsity in the differences. [16] coined the term "fusion" who proposed to use the penalty of form \textit{$\mathit{\Sigma}$j {\textbar}$\beta$j $-$$\beta$j$-$1{\textbar} $\alpha$ s2} for various values of \textit{$\alpha$=0, 1, 2} and so on.
+
+\noindent \includegraphics*[width=4.09in, height=3.19in, keepaspectratio=false, trim=1.22in 0.63in 1.20in 0.00in]{image4}
+
+\noindent \textit{Fig. 4 Schematic diagram of fused lasso for N $>$ p = 2.}
+
+\noindent The schematic view of a fused lasso for the scenario \textit{N $>$ p = 2} is shown in Fig. 4. The contours of the sum-of-squares loss function fulfil, as we can see.
+
+\noindent \textbf{Advantages of Fused Lasso Regression}
+
+\noindent In situations where the features have a natural order, the fused lasso appears to be a suitable method for regression and classification. We can fuse or defuse a group of variables in the fused lasso by adding or dropping a variable.
+
+\noindent \textbf{Disadvantages of Fused Lasso Regression}
+
+\noindent Computational speed is one of the drawbacks of employing the fused lasso.
+
+\noindent 
+
+\noindent 
+
+\noindent 
+
+\noindent \textbf{OLS Multi-Linear Regression}
+
+\noindent Multiple linear regression is a statistical approach for deciding the outcome of a parameter based on values of multiple variables. Multiple regression is a kind of regression analysis. The response variable is the one we are expecting, and the exogenous variables are indeed the ones we are using to do so. This technique can be used to calculate the model's fluctuation and the percentage influence of each explanatory variable on the total variance. This regression analysis can be classified into two types: linear \& non-linear. The following method can be used to alter the simple linear regression equation to include many dependent variables:
+\begin{equation} \label{GrindEQ__12_} 
+\mathrm{Y\ =\ }{\mathrm{A\ }}_0\mathrm{+\ }{\mathrm{A}}_1{\mathrm{X\ }}_1\mathrm{+\ }{\mathrm{A}}_2{\mathrm{X\ }}_2\mathrm{\ +\ \dots \dots \ +\ }{\mathrm{A}}_n{\mathrm{X\ }}_n\mathrm{\ } 
+\end{equation} 
+\textit{Y is the expected or dependent variable.}
+
+\noindent \textit{A0 is y-intercept when X1, X2 are equal to 0}
+
+\noindent \textit{The regression coefficients A1 and A2 represent the change in y as a function of a one-unit change in X1 and X2.}
+
+\noindent \textit{For each independent variable, ANXN is the slope coefficient.}
+
+\noindent Considering knowledge from another parameter, analysts can use a simple linear method to estimate the value of a variable. The goal of linear regression is to create a smooth contrast between two parameters. Multiple regression is a type of regression in which the response variable has a linear relationship with two or more factors. If both factors do not follow a perfect line, it is called non-linearity. To visually monitor a specific response, both linear and non-linear regression employs different variables. Non-linear regression is extremely hard to implement since it relies on hypotheses learned via experimentation.
+
+\noindent \textbf{Observational independence:}
+
+\noindent According to the model, the information is irrelevant to each other. The model states that perhaps the residual values are unrelated. Multivariate normality occurs when residuals are dispersed in some predictable pattern.
+
+\noindent \textbf{Advantages of OLS Multi-Linear Regression}
+
+\noindent The ability to identify the relative importance of one or even more predictor variables upon that criterion. It is sensitive enough to detect anomalies and the essential benefit of Multi-Linear regression is that It facilitates the comprehension of links among data samples. This would make the correspondence among dependent and independent factors clearer to understand.
+
+\noindent \textbf{Disadvantages of OLS Multi-Linear Regression}
+
+\noindent Multivariate approaches are a little more complicated and necessitate much math. The output of the multivariate regression model can be challenging to comprehend at times since some loss and error outputs are not identical. Smaller datasets are not well-suited to this strategy. As a result, the same cannot be said of them. For larger datasets, the outcomes are better.
+
+\noindent 
+
+\noindent \textbf{OSCAR (octagonal shrinkage and clustering algorithm for regression)}
+
+\noindent OSCAR [8] is a method for selecting variables and organizing them into prediction clusters simultaneously. In addition to improving prediction accuracy and understanding, these generated clusters could be further investigated to see what leads to a group's similar actions. The process relies on a punitive least-square, which uses a mathematically simple punishment mechanism to reduce some coefficients to zero. Furthermore, because this punishment leads to exact equality of some parameters, it promotes linked variables with effects similar to the outcome to cluster into prediction groups consisting of a single factor.
+
+\noindent The OSCAR [8] is built using a constrained least-squares problem, similar to earlier techniques. For the coefficients, L1 norm and L $\mathrm{\infty}$ norm's weights were combined and employed as the constraint. Its optimization problem is defined as 
+\begin{equation} \label{GrindEQ__13_} 
+\widehat{\beta }={\mathrm{arg} min{\left\|y-\sum^p_{j=1}{{\beta }_jx_j}\right\|}^2subject\ to\ \ }\sum^p_{j=1}{\left|{\beta }_j\right|+c\sum_{j<k}{\mathrm{max}\mathrm{}\{\left|{\beta }_j\right|\left|{\beta }_k\right|\}\le t}} 
+\end{equation} 
+The calibration constants c and t,
+
+\noindent c controls the relative weighting of norms, while the magnitude is controlled by t.
+
+\noindent L $\mathrm{\infty}$ norm promotes coefficients equality.
+
+\noindent For the features which are not 0, the OSCAR's optimization framework favors a cheese-pairing solution. On analyzing the solution of least squares, we get to know how this penalty will support grouping and sparsity simultaneously. The sum of squares loss function is represented as:
+\begin{equation} \label{GrindEQ__14_} 
+{\left(\beta -{\widehat{\beta }}^0\right)}^TX^TX\left(\beta -{\widehat{\beta }}^0\right) 
+\end{equation} 
+The contours are in the form of ellipses which are centered at the solution which is Beta0.
+
+\noindent Because the predictors are normalized, the central axis of the curves is at $\mathrm{\pm}$45? degrees to the floor when p = 2. Because the contours are XTX, a high correlation would result at -45?, but a negative correlation would be the opposite.~
+
+\noindent First-ever time the boundaries of the sum-of-squares error function reach the limitation area on the~\textit{($\beta$1, $\beta$2)}~plane, the answer is straightforward. The LASSO and the Elastic Net [5] that use a combination of L1 and L2 punishments have different constraint regions, depicted on the left side of Figure 5. The ridge regression boundaries are circles with the source in the middle (not shown). Because the outlines are more capable of hitting the vertices, the non-differentiability of LASSO [1] or Elastic Net [5] just at the axis encourages randomness, with LASSO [1] accomplishing a higher amount owing to the straight border. Meanwhile, if multiple variables are firmly linked, Elastic Net is more likely to incorporate both in the equation than just one.
+
+\noindent Fig. 6 below indicates that when the predictors are highly associated, clustering is far more frequent with the same OLS solution.
+
+\noindent Consider OSCAR's representation in terms of the penalized least-squares criteria with lambda as the penalty parameter. Supposing set of related variables~X1 to XP~are in the order so their coefficient approximations satisfy 0 $\mathrm{<}$ abs (beta 1) to abs (beta Q) and beta Q+1= beta p=0. Let 0 $\mathrm{<}$ theta 1 $\mathrm{<}$ theta G denotes values which are not equal to 0 of set abs (beta j)~so that G $\mathrm{<}$= Q\textit{.}
+
+\noindent 
+
+\noindent \textit{For every g = 1 to G,}
+\[let\ Gg=\{j:\left|{\beta }^j\right|=\theta g\}\] 
+\textit{Constructing group n x G}
+
+\noindent \textit{Related variable matrix }
+\[X*\equiv \left[x*1\ to\ x*G\right]\ with\ x*g=j\in Gg\ sign({\beta }^j)xj\] 
+\includegraphics*[width=3.78in, height=1.99in, keepaspectratio=false]{image5}
+
+\noindent \textit{Fig. 5 Graphical depiction of the area of restriction in the ($\beta$1, $\beta$2)}
+
+\noindent 
+
+\noindent For LASSO, Elastic Net \& OSCAR, a graphical depiction of the constraint region in the \textit{($\beta$1, $\beta$2)} plane is shown.
+
+\noindent \includegraphics*[width=3.77in, height=2.34in, keepaspectratio=false]{image6}
+
+\noindent \textit{Fig. 6 Graphical representation in the ($\beta$1, $\beta$2) plane}
+
+\noindent In \textit{($\beta$1, $\beta$2)} plane, Fig. 6 displays a graphical representation.
+
+\noindent When the outlines of the sum-of-squares function meet with the octagonal restriction area for the very first time, the OSCAR solution occurs.
+
+\noindent \textbf{Exact Grouping Property}
+
+\noindent The OSCAR representation like a problem of optimization in penalized form is as follows:
+\[\widehat{\beta }={\mathrm{arg} min{\left\|y-\sum^p_{j=1}{{\beta }_jx_j}\right\|}^2+\ \ }\lambda \left[\sum^p_{j=1}{\left|{\beta }_j\right|+c\sum_{j<k}{\mathrm{max}\mathrm{}\{\left|{\beta }_j\right|\left|{\beta }_k\right|\}}}\right]\] 
+\begin{equation} \label{GrindEQ__15_} 
+={\mathrm{arg} min{\left\|y-\sum^p_{j=1}{{\beta }_jx_j}\right\|}^2+\ \ }\lambda \sum^p_{j=1}{\{c\left(j-1\right)+1\}{\left|\beta \right|}_{(j)}} 
+\end{equation} 
+
+
+\noindent The restriction limit t and the penalization variable now have an explicit relationship.
+
+\noindent This transformation comprises combining predictors with comparable sizes of factors by a combining information of their quantities, just like when launching a unique forecast from the group mean. As a result, the summed weights are as follows:
+\[w_g=\sum_{j\epsilon \widehat{Gg}}{\{c\left(j-1\right)+1\}}\] 
+This can also be explained as active group of related variables with 0 $\mathrm{<}$ theta 1 to theta G.
+\begin{equation} \label{GrindEQ__16_} 
+\widehat{\theta }={\mathrm{arg} min{\left\|y-\ \sum^G_{g=1}{{\theta }_gx^*_g}\right\|}^2\ }+\ \lambda \sum^G_{g=1}{w_gx^*_g} 
+\end{equation} 
+
+
+\noindent Equation can be used to calculate the lambda value for a solution obtained from a given t value.
+
+\noindent Which can be shown as:
+\begin{equation} \label{GrindEQ__17_} 
+\lambda =2x^{*T}_g(y-\ X^*\widehat{\theta })/W_g\  
+\end{equation} 
+\textbf{Computation and Cross validation:}
+
+\noindent A computational technique is used to determine the OSCAR approximation for one particular group of calibration parameters (t, c). \textit{$\beta$j = $\beta$+ j $-$ $\beta$$-$ j} with both \textit{$\beta$+ j and $\beta$$-$ j} being positive then \textit{{\textbar}$\beta$j {\textbar} = $\beta$+ j + $\beta$$-$ j.} Furthermore, for bilateral maxima, \textit{p(p$-$1)/2} factors \textit{$\eta$jk} for \textit{1 $\le$ j} is introduced, making the optimization issue more difficult.
+
+\noindent 
+
+\noindent 
+\[Minimize=\ \frac{1}{2}{\left\|y-\sum^p_{j=1}{\left(B^+_j-B^-_j\right)x_j}\right\|}^2\] 
+Subject to
+\[\sum^p_{j=1}{\left(B^+_j-B^-_j\right)+\ c\sum_{j<k}{n_{jk}\le t}}\] 
+\[n_{jk}\ge B^+_j-B^-_j,\ n_{jk}\ge B^+_k-B^-_k\ \ for\ each\ 1\le j<k\le p\] 
+\begin{equation} \label{GrindEQ__18_} 
+B^+_j\ge 0,\ B^-_j\ge 0\ \ for\ all\ \ j=1,\ \dots ,p,\  
+\end{equation} 
+The minimization is done with the extended parameter vector in mind. This forms a quadratic problem with total parameters of \textit{(p2 + 3p)/2} and total linear constraints of \textit{p2 + p + 1}. Although the constraint matrix is big, it is also extremely sparse. SQOPT (Gill, Murray, and Saunders, 2005), a quadratic programming approach designed primarily for substantial sparse matrix issues was used to execute the optimization. This algorithm can immediately solve problems with a few predictors around 100.
+
+\noindent \textbf{Choosing the tuning parameters:}
+
+\noindent Lowering the out-of-sample forecast error approximation can be used to choose the tuning parameters~\textit{(c, t).}~This can be easily estimated if a validation set is supplied. In the absence of a validation set, 5-fold cross-validation can be used to determine the standard errors. The amount of positive actual variables is a reliable measure of degrees of freedom for the LASSO [10], [5]. Calculate the degrees of freedom infused lasso [6] by counting the positive, unique blocks of coefficients.
+
+\noindent 
+
+\noindent \textbf{Advantages of OSCAR:}
+
+\noindent It is the latest approach for choosing variables in regression analysis while also doing guided clustering. In contrast to least-squares extrapolation criteria, the OSCAR penalty can be used for other optimizations. Like other penalized regression techniques, the OSCAR solution can be viewed as the post method for early distributions.
+
+\noindent 
+
+\noindent \textbf{Disadvantages of OSCAR:}
+
+\noindent Many conventional solvers may have problems immediately tackling the quadratic programming issue due to its size.
+
+\noindent \textbf{}
+
+\noindent \textbf{Simulation}
+
+\noindent To evaluate the performance of the aforementioned strategies, a simulation study was conducted. With p = 20 covariates and a sample size of n = 25, this is an example problem. Each of the first six variables has a true coefficient of one and is normally distributed with a strong AR \eqref{GrindEQ__1_}-type connection. The remaining 14 variables are unaffected independent normals.
+
+\noindent \includegraphics*[width=4.44in, height=2.74in, keepaspectratio=false]{image7}
+
+\noindent \textit{Fig. 7 Corrplot showing strong correlation between first 6 features}
+
+\noindent Fig. 7 shows demonstrates for the sample problem such as the first 6 features A to F have a strong AR \eqref{GrindEQ__1_}-type connection and the remaining 14 variables are unaffected independent normals.
+
+\noindent 
+
+\noindent The dataset was then divided into 70/30 ratio for training and testing in order to calculate error rates like RMSE and r-squared. The model was given a collection of features X and a response vector Y as inputs. X is the n by p design matrix. The coefficients of the standardized predictors will be returned. The train Control parameters are stored in a control specifications variable, which is used for cross-validation up to 5 folds to find the best value for lambda. The models were then trained on this simulated dataset and the following coefficients were returned.
+
+\noindent 
+
+\noindent \textbf{Table 1}
+
+\noindent \textit{Estimated coefficients for simulated dataset}
+
+\begin{tabular}{|p{0.7in}|p{0.7in}|p{0.7in}|p{0.7in}|p{0.7in}|p{0.6in}|} \hline 
+Variables & Lasso & Ridge & Elastic-Net & Group Lasso & OSCAR \\ \hline 
+A & 0.292 & 0.053 & 0.151 & 0.202 & 0.204 \\ \hline 
+B & 0.081 & 0.053 & 0.134 & 0.162 & 0.139 \\ \hline 
+C & 0.041 & 0.052 & 0.100 & 0.086 & 0.114 \\ \hline 
+D & 0.161 & 0.051 & 0.101 & 0.112 & 0.338 \\ \hline 
+E & 0.096 & 0.049 & 0.112 & 0.139 & 0 \\ \hline 
+F & 0.174 & 0.051 & 0.156 & 0.240 & 0.154 \\ \hline 
+G & 0.050 & 0.014 & 0.028 & 0.042 & -0.017 \\ \hline 
+H & -0.099 & -0.029 & -0.066 & -0.069 & -0.138 \\ \hline 
+I & . & 0.003 & . & . & -0.091 \\ \hline 
+J & 0.027 & 0.002 & . & . & 0.043 \\ \hline 
+K & . & -0.029 & . & . & 0.055 \\ \hline 
+L & 0.033 & 0.010 & . & . & 0.141 \\ \hline 
+M & 0.023 & 0.000 & . & . & 0 \\ \hline 
+N & . & 0.019 & . & . & 0.101 \\ \hline 
+O & 0.065 & -0.004 & . & . & 0.154 \\ \hline 
+P & . & -0.013 & . & . & -0.084 \\ \hline 
+Q & . & -0.017 & . & . & 0 \\ \hline 
+R & 0.102 & 0.007 & . & . & 0.152 \\ \hline 
+S & . & 0.014 & . & . & 0.064 \\ \hline 
+T & . & 0.012 & . & . & 0 \\ \hline 
+\end{tabular}
+
+
+
+\noindent The estimated coefficients for the simulated dataset are shown in Table 1. Seeing for the Lasso, we know that the first six features with strong correlation are penalized to a lesser extent than other features, and the remaining features were reduced to zero as done by the Lasso. For the ridge, no feature was eliminated, but the strongly correlated features were given greater weight. Because the elastic net is a hybrid, it lowered more than half of the features to zero, except for the first six, which were merely punished to a degree. By generating groups of characteristics, Group Lasso achieves comparable outcomes to the elastic net. For the OSCAR, we can see that it has used cluster formation to perform penalization, and the estimated coefficients are shown in table 1.\textbf{}
+
+\noindent \textbf{}
+
+\noindent \textbf{}
+
+\noindent \textbf{\includegraphics*[width=3.51in, height=2.25in, keepaspectratio=false]{image8}}
+
+\noindent \textit{Fig. 8 Variable importance for Lasso}
+
+\noindent \textbf{\includegraphics*[width=3.55in, height=2.27in, keepaspectratio=false]{image9}}
+
+\noindent \textit{Fig. 9 Variable importance for Ridge}
+
+\noindent \textbf{\includegraphics*[width=3.59in, height=2.30in, keepaspectratio=false]{image10}}
+
+\noindent \textit{Fig. 10 Variable importance for Elastic-Net}
+
+\noindent Fig. 8, 9 \& 10 show the importance given to the variables while training the model respectively.
+
+\noindent \textbf{\includegraphics*[width=4.36in, height=2.94in, keepaspectratio=false, trim=0.66in 0.00in 0.22in 0.29in]{image11}}
+
+\noindent \textit{Fig. 11 Plot for finding optimal lambda for lasso, ridge \& elastic-net}
+
+\noindent In the case of lasso, ridge, and elastic-net regression, Fig. 11 shows the graph for determining the best value for lambda. This is a plot of log(lambda) against RMSE, with the best lambda value chosen for the model with the lowest RMSE value. The red line represents the lasso, the blue line represents the ridge results, and the green line indicates elastic-net.
+
+\noindent 
+
+\noindent \textbf{\includegraphics*[width=3.72in, height=2.30in, keepaspectratio=false]{image12}}
+
+\noindent \textit{Fig. 12 Plot showing how increasing lambda shrinks the coefficients for lasso regression}
+
+\noindent 
+
+\noindent \includegraphics*[width=3.72in, height=2.30in, keepaspectratio=false]{image13}\textbf{}
+
+\noindent \textit{Fig. 13 Plot showing how increasing lambda shrinks the coefficients for ridge regression}
+
+\noindent \textbf{\includegraphics*[width=3.78in, height=2.34in, keepaspectratio=false]{image14}}
+
+\noindent \textit{Fig. 14 Plot showing how increasing lambda shrinks the coefficients for Elastic-net regression}
+
+\noindent \textbf{}
+
+\noindent 
+
+\noindent Fig. 12, 13 \& 14 shows how increasing the value of lambda shrinks the coefficients for ridge, lasso \& elastic net respectively. Each line represents the coefficients for one variable for various lambdas. The higher the lambda, the smaller the coefficients become as they approach 0.
+
+\noindent 
+
+\noindent \includegraphics*[width=4.36in, height=2.69in, keepaspectratio=false]{image15}
+
+\noindent \textit{Fig. 15 Plot of fit for the group lasso}
+
+\noindent \textit{}
+
+\noindent \textbf{Table 2}
+
+\noindent \textit{Calculated values of RMSE \& R-squared for all models on simulated dataset}
+
+\begin{tabular}{|p{1.3in}|p{1.3in}|p{1.3in}|} \hline 
+\textbf{Models} & \textbf{RMSE} & \textbf{R-squared} \\ \hline 
+Lasso & 0.2340 & 0.9806 \\ \hline 
+Ridge & 0.9653 & 0.9980 \\ \hline 
+Elastic-Net & 0.1923 & 0.9915 \\ \hline 
+Group Lasso & 0.1897 & 0.9884 \\ \hline 
+\end{tabular}
+
+
+
+\noindent Table 2 compares all models in terms of RMSE and r-squared, making it easier to assess their performance. Training and testing groups were created using the simulated dataset. The training set was used to understand the patterns in the dataset, and the testing set was used to determine how accurate the model was. The models were evaluated for the test sample after training, and the predictions were compared to the actual test data to obtain the RMSE and R-squared errors. Table 2 demonstrates that in this example, the ridge did the poorest in terms of RMSE, whereas the lasso performed significantly better, with an RMSE score of 0.234. Elastic Net came in second, outperforming the lasso, a combination of both, with an RMSE of 0.1923. Finally, the group lasso demonstrates that grouping is critical to model performance, with an RMSE of 0.1897, the best in this scenario. 
+
+\noindent \textbf{}
+
+\noindent \textbf{DATASET}
+
+\noindent This example is based on a survey of correlations among soil characteristics and valuable forest variety in the Appalachian Region of North Carolina. Twenty 500 square meter sites were examined. The results are the number of various plant varieties examined inside the plot and the 15 loam parameters employed as forest diversity predictors. Each plot's soil measurements are an average of five measurements obtained at random intervals throughout the plot. Figure 3 depicts several highly associated predictors. The first seven variables all have something to do with the quantity of positively charged ions or cations. The quantity of cations is represented by \% base saturation, exchangeable cations (CEC), and the summation of cations; cations include magnesium, calcium, potassium, etc. In rare circumstances, the close bilateral relationships between such factors can reach 0.95. The potassium and sodium correlations are not quite as strong as the others.
+
+\noindent Salt plus phosphorus, as well as soil pH and interchangeable acidity, 2 acidification metrics, have a strong relationship.
+
+\noindent Dataset consists of all numeric features
+
+\noindent \textbf{BaseSat}: a summary of the cation abundance; 
+
+\noindent \textbf{SumCation}: a summary of the cation abundance; 
+
+\noindent \textbf{CECbuffer}: a summary of the cation abundance; 
+
+\noindent \textbf{Ca}: Calcium which is the example of cation 
+
+\noindent \textbf{Mg}: Magnesium which is the example of cation
+
+\noindent \textbf{K}: Potassium which is the example of cation
+
+\noindent \textbf{Na}: Sodium which is the example of cation 
+
+\noindent \textbf{P}: Phosphorus which is the example of cation 
+
+\noindent \textbf{Cu}: Copper which is the example of cation 
+
+\noindent \textbf{Zn}: Zinc which is the example of cation 
+
+\noindent \textbf{Mn}: Manganese which is the example of cation 
+
+\noindent \textbf{HumicMatter}: Compounds found in humus that constitute significant components
+
+\noindent \textbf{Density}: Measure of density for the soil data
+
+\noindent \textbf{pH}: hydrogen ion concentration in a solution on average
+
+\noindent \textbf{ExchAc : }numeric\textbf{ }attribute representing exchangeable acidity 
+
+\noindent \textbf{Diversity: }Target attribute / dependent variable for forest diversity prediction
+
+\noindent \textbf{}
+
+\noindent \textbf{Heatmap}
+
+\noindent A heatmap is a graphical depiction of data that use a color-coding method to represent various values. Heatmaps are utilized in a variety of analytics applications, but they're most typically employed to display user behavior on webpage designs. Heatmaps can provide a more detailed picture of how features are actually behaving.
+
+\noindent \textbf{Complex Detailed Heatmap of our soil dataset:}
+
+\noindent 
+
+\noindent \includegraphics*[width=5.40in, height=3.33in, keepaspectratio=false]{image16}
+
+\noindent \textit{Fig. 16 Complex heatmap for the soil dataset}
+
+\noindent \textbf{Corrplot:}
+
+\noindent The R package corrplot is a visual exploring tool for correlation matrices that includes automatic variable reordering to aid in the detection of hidden patterns. corrplot is simple to use and offers a wide range of plotting options in terms of visualization approach, graphic layout, color, legends, and text labels, among other things. 
+
+\noindent \textbf{Corrplot for our soil dataset:}
+
+\noindent \includegraphics*[width=3.69in, height=3.02in, keepaspectratio=false, trim=0.72in 0.00in 0.70in 0.00in]{image17}
+
+\noindent \textit{Fig. 17 Corrplot of soil dataset representing correlation between features}
+
+\noindent 
+
+\noindent The convergent validity of the 15 soil data variables are visually shown. A block in the colored image represents the magnitude of each pairwise association.
+
+\noindent \textbf{ggplot}:
+
+\noindent ggplot2 is a charting program that makes it simple to create complex charts using the information in the data framework. It includes more effective feedback to determine which factors must be charted, how they are being presented, and other graphic cues. For Lasso, ridge, elastic-net, and OLS multi-linear regression, we utilized ggplot to show the variable importance. So, to look at which aspects were deemed the most significant for that model and which features were deleted or decreased to 0 for that model.
+
+\noindent \textbf{}
+
+\noindent \textbf{}
+
+\noindent \textbf{}
+
+\noindent \textbf{}
+
+\noindent \textbf{}
+
+\noindent \textbf{}
+
+\noindent \textbf{}
+
+\noindent \textbf{}
+
+\noindent \textbf{}
+
+\noindent \textbf{LASSO REGRESSION:}
+
+\noindent \includegraphics*[width=5.10in, height=3.15in, keepaspectratio=false]{image18}
+
+\noindent \textit{Fig. 18 ggplot of variable importance for Lasso Regression}
+
+\noindent We can see that lasso has reduced 12 features to 0 by looking at the variable relevance for lasso regression. HumicMatter, CECbuffer, and Mn are the main essential aspects considered here. CECbuffer was reduced to 69.85 percent and Mn to 54.57 percent, with HumicMatter having the highest importance of 100 percent. While the rest of the dataset's features were reduced to a value of 0.
+
+\noindent \textbf{RIDGE REGRESSION:}
+
+\noindent \includegraphics*[width=5.03in, height=3.11in, keepaspectratio=false]{image19}\textbf{}
+
+\noindent \textit{Fig. 19 ggplot of variable importance for Ridge Regression}
+
+\noindent 
+
+\noindent When we look at the variable relevance for ridge regression, we can see that rather than entirely lowering all of the dataset's features to 0, as shown in lasso, all of them have some importance. In this scenario, HumicMatter has 100 percent importance, which was also the case in the lasso. CECbuffer was reduced to 51.79\%, Mn 47.09\%, Ca 44.3\%, SumCation 41.6\%, Zn 37.5\%, Density 35.9\%, Mg 27.1\%, Na 25\%, BaseSat 22.2\%, pH 17\% ExchAc 14\%, K 4.1\%, Cu 2.66\% and P 0\%.
+
+\noindent According to ridge regression, the only feature that was punished the most was phosphorus; the rest were decreased to a specific point..
+
+\noindent \textbf{ELASTIC-NET:}
+
+\noindent \includegraphics*[width=5.25in, height=3.20in, keepaspectratio=false]{image20}\textbf{}
+
+\noindent \textit{Fig. 20 ggplot of variable importance for Elastic-Net Regression}
+
+\noindent 
+
+\noindent The elastic net is a hybrid of the ridge and the lasso. This means combining the ridge and lasso powers to create a powerful model. The elastic-net variable importance tells us that some characteristics will be fully lowered to 0 (which is used in lasso), and some features will be penalized (used in the ridge). The HumicMatter has the highest priority of 100 percent, as it did in ridge and lasso. The second most essential feature was phosphorus, which was reduced to only 68.1\%, Mn to 61\%, Ca 53.5\%, SumCation 44.8\%, Cu 44.2\%, pH 28.2\%, Na 26.6\%, CECbuffer 24.6\%, which was considered the second most important for ridge and lasso but not in the case for elastic-net. Mg was reduced to 15.5\%, density 14.3\% BaseSat 10.2\%, Zn 4\% and ExchAc and K to 0\%.
+
+\noindent Only two features, ExchAc and K, were lowered in the case of elastic-net. The remainder of the attributes, on the other hand, were penalized and lowered to a certain extent.
+
+\noindent \textbf{}
+
+\noindent \textbf{}
+
+\noindent \textbf{OLS MULTI LINEAR REGRESSION}
+
+\noindent \includegraphics*[width=5.25in, height=3.24in, keepaspectratio=false]{image21}
+
+\noindent \textit{Fig. 21 ggplot of variable importance for OLS Multi-Linear Regression}
+
+\noindent 
+
+\noindent For the variable importance of OLS MLR, we see that the penalization is very low for each feature. In this case, Manganese was considered the most important for the OLS MLR model with an importance of 100\%. Cu was considered second with 97\% importance, p 90.9\%, pH 88.1\%, HumicMatter 72.8\%, which was considered the most important for the ridge, lasso, and elastic-net models. Mg 70.1\%, Zn 64.5\%, CECbuffer 62.3\%, ExchAc 61\%, Ca 52.9\%, density 46.3\%, K 36.6\%, BaseSat 34.5\% and SumCation 0\%. Here SumCation was the only feature that the OLS MLR model gave 0\% importance.
+
+\noindent 
+
+\noindent 
+
+\noindent 
+
+\noindent 
+
+\noindent 
+
+\noindent 
+
+\noindent 
+
+\noindent 
+
+\noindent 
+
+\noindent 
+
+\noindent \textbf{Table 3}
+
+\noindent \textit{Estimated coefficients for soil dataset}
+
+\begin{tabular}{|p{0.7in}|p{0.5in}|p{0.5in}|p{0.5in}|p{0.5in}|p{0.5in}|p{0.5in}|p{0.5in}|} \hline 
+Variables & Lasso & Ridge & Elastic-Net & Group Lasso & Fused Lasso & OLS MLR & OSCAR \\ \hline 
+BaseSat   & . & -0.001 & -0.002 & 0.001 & 6.975 & -0.090 & . \\ \hline 
+SumCation     & . & -0.001 & -0.008 & -0.009 & 0.919 & 0.177 & -0.178 \\ \hline 
+CECbuffer    & -0.012 & -0.002 & -0.005 & -0.001 & 0.856 & 3.495 & -0.178 \\ \hline 
+Ca            & . & -0.001 & -0.010 & -0.238 & 0.781 & -3.010 & -0.178 \\ \hline 
+Mg            & . & -0.001 & -0.003 & 1.568 & 0.115 & -0.849 & . \\ \hline 
+K             & . & 0.000 & . & -1.502 & 0.027 & -0.071 & -0.178 \\ \hline 
+Na & . & -0.001 & -0.005 & -2.655 & 0.011 & . & . \\ \hline 
+P & . & 0.000 & 0.013 & 0.033 & 0.628 & 0.030 & 0.091 \\ \hline 
+Cu & . & 0.000 & 0.008 & 0.051 & 0.180 & 0.073 & 0.237 \\ \hline 
+Zn & . & 0.001 & -0.001 & -0.043 & 0.389 & -0.025 & . \\ \hline 
+Mn & 0.009 & 0.001 & 0.012 & 0.011 & 3.468 & 0.033 & 0.267 \\ \hline 
+HumicMatter & -0.017 & -0.003 & -0.019 & -0.231 & 0.307 & -0.090 & -0.541 \\ \hline 
+Density & . & 0.001 & 0.003 & 0.000 & 0.023 & -0.058 & . \\ \hline 
+pH & . & 0.001 & 0.005 & 0.000 & 0.117 & 0.087 & 0.145 \\ \hline 
+ExchAc & . & -0.001 & . & 0.000 & 0.268 & -1.060 & . \\ \hline 
+\end{tabular}
+
+
+
+\noindent 
+
+\noindent The estimated coefficients of the 15 predictors for the seven models are shown in Table 3. After completing 5-fold cross-validation to assess the ideal value, all coefficients were calculated, and models were trained after assigning a specific penalty to the predictors based on the models' concerns. Lasso's penalty is set to alpha = 1, implying that it can decrease the features to zero, as shown in the table. Only CECbuffer, Mn, and HumicMatter are lowered, while the rest are punished and reduced to zero. The second method is ridge regression, which works well with our soil dataset. The value for alpha for the ridge is set to 0, indicating that it can punish and reduce features but not to zero, similar to how PCA (principal component analysis) is used to make feature selection by reducing the dataset's dimensions. All of the predictors are penalized and decreased to some extent, but not to zero, implying that some information from each predictor is used to enrich the model. The value for alpha in elastic-net, which is a blend of ridge + lasso, is set at 0.5 to combine the powers of both models. As a result, elastic-net can penalize predictions to some extent while also reducing some to zero. As shown in the table, potassium (K) and ExchAc have been decreased to zero, while the remaining attributes have been penalized and reduced to some degree. Because it is a blend of ridge \& lasso, it produces results somewhere in the middle.
+
+\noindent Furthermore, taking into account group lasso, which groups the predictors, was not done in any of the prior models presented. When cross-validation is used for gene data, the best group is picked for the highest correlated predictors. When looking at group lasso, it is evident that the highly linked variables prefer to stay together, whereas others join the group for a short time before being pulled away. When we look at the predictor coefficients for group lasso, we can see that each coefficient is penalized for the best group picked, with some being decreased to near zero, implying that they are less essential to supplement the model. The fused lasso [6] takes two alpha values and can fuse and defuse a cluster of features by adding or eliminating one. Some predictors are also defused by penalizing them, but none are reduced to exactly 0 via fused lasso. When it comes to multi-linear regression, OLS has low penalizing power. That is, it cannot make feature selection based on punishing or lowering predictors. Looking at the table of coefficients, we can see that OLS MLR has reduced the predictors by a small amount, but not exactly 0, and has considered all of the features to be necessary, resulting in a change in results because no good feature selection or feature reduction is being performed on this high-dimensional soil data. As a result, it prioritizes all features over the ridge, lasso, and elastic net. Finally, the OSCAR [8] approach can pick variables by grouping them into clusters. All of the predictors chosen by the LASSO and additional cation covariates are included in the fivefold cross-validation OSCAR solution (Table 3). 
+
+\noindent The OSCAR [8] approach incorporates all four cationic variables into a single model with six non-negative variables. The cation variables are all related to the same underlying component and are highly correlated. As a result, instead of considering them as separate variables and selecting a sample at random, utilizing their sum as a derived predictor may yield a more accurate estimate of the root cause, and hence a precious and accurate model. We can see that CECbuffer is the first cation-related covariate to enter the OSCAR [8] and lasso because lasso is a specific instance of OSCAR. Manganese (Mn) and HumicMatter are two more covariates that the OSCAR and Lasso might choose from.
+
+\noindent \textbf{}
+
+\noindent \textbf{Results and Discussion}
+
+\noindent \textbf{Performance evaluation criteria for finding optimal lambda:}
+
+\noindent The key challenge in this study was determining the best tuning parameter lambda for the model in order to reduce RMSE and R-squared errors. Because this is a regression problem and the aim is Diversity, which is a continuous variable, the evaluation metrics RMSE and R-squared are utilized. Coming towards the selection of optimal lambda the trainControl function is using from the caret package to implement cross-validation up to 5-folds and the method is initialized in the control specifications variable.
+
+\noindent The following code demonstrates the syntax used to accomplish cross-validation:
+
+\noindent \textit{Control\_specifications $<$- trainControl (method = "cv", number = 5,}
+
+\noindent \textit{save Predictions = "all")}
+
+\noindent Now a vector was created to store the potential values for lambda. The vector's values ranged from -5 to 5 with length = 500. 
+
+\noindent Following code shows how the vector was initialized:
+
+\noindent \textit{lambda\_vector $<$- 10$\wedge$seq (5, -5, length=500)}
+
+\noindent The models were now trained with the train function, and the regression models lasso, ridge, and elastic-net were implemented with the ``glmnet'' package, which was also supplied a vector of lambda values. Following successful training, we obtain the optimal tuning parameter lambda, with the lowest RMSE. The log(lambda) graphs were plotted against the model's RMSE.
+
+\noindent \textbf{Lasso Regression:}
+
+\noindent \textbf{\includegraphics*[width=4.38in, height=2.71in, keepaspectratio=false]{image22}}
+
+\noindent \textit{Fig. 22 Plot of RMSE against log(lambda) for Lasso Regression }
+
+\noindent Looking at the graph, we can see that in the case of lasso regression, the ideal value of lambda is 0.004029122. 
+
+\noindent \textbf{Ridge Regression:}
+
+\noindent \textbf{\includegraphics*[width=4.38in, height=2.71in, keepaspectratio=false]{image23}}
+
+\noindent \textit{Fig. 23 Plot of RMSE against log(lambda) for Ridge Regression }
+
+\noindent \textbf{}
+
+\noindent In the instance of ridge regression, the best lambda value is 0.2232016.
+
+\noindent 
+
+\noindent \textbf{Elastic-Net Regression: }
+
+\noindent \textbf{\includegraphics*[width=4.52in, height=2.79in, keepaspectratio=false]{image24}}
+
+\noindent \textit{Fig. 24 Plot of RMSE against log(lambda) for Elastic-Net Regression }
+
+\noindent \textbf{}
+
+\noindent Looking at the graph for elastic-net, we can see that the best tuning parameter lambda is 0.0009202967 in this situation.
+
+\noindent So, different regression models have different lambda values, and they have different alpha values, which is the penalization parameter. This optimal tuning parameter is critical in this case because it determines the value of a low RMSE, and the less the value of RMSE, the better fit is seen. In the next section, we'll look at the RMSE and R-squared assessment measures.
+
+\noindent \textbf{Regression Results (RMSE \& R-squared):}
+
+\noindent \textbf{RMSE}
+
+\noindent The RMSE is a metric about how spaced out the data points are. Residuals are a measurement of how distant the data points are from the regression line. To put it another way, it shows how closely the data is grouped around the line of greatest fit. RMSE is commonly used to assess research findings in climatology, predictions, and multiple regression.
+
+\noindent RMSE error metric is widely used, and it is regarded as a good general-purpose error meter for numerical forecasts.
+
+\noindent RMSE can be calculated using the given formula:
+\begin{equation} \label{GrindEQ__19_} 
+RMSE=\ \sqrt{\frac{\sum^N_{i=1}{{||y\left(i\right)-\hat{y}(i)||}^2}}{N}} 
+\end{equation} 
+\textbf{}
+
+\noindent \textbf{}
+
+\noindent \textbf{R-squared:}
+
+\noindent In a regression model for a predictor variable, R-squared is a quantitative metric that measures the amount of variation described by predictor factors. R-squared demonstrates how much 1 variable's change explains the variability of the other, while correlation explains the significance of the association between two independent variables. The coefficient of determination is another name for it.
+
+\noindent R-squared error can be calculated by the given formula:
+\begin{equation} \label{GrindEQ__20_} 
+R^2=1-\frac{{SS}_{res}}{{SS}_{tot}}=1-\ \frac{{\sum_i{(y_i-{\hat{y}}_i)}}^2}{{\sum_i{(y_i-\overline{y})}}^2} 
+\end{equation} 
+
+
+\noindent \textbf{Table 4}
+
+\noindent \textit{Calculated values of RMSE \& R-squared for all models on soil dataset}
+
+\begin{tabular}{|p{1.3in}|p{1.3in}|p{1.3in}|} \hline 
+\textbf{Models} & \textbf{RMSE} & \textbf{R-squared} \\ \hline 
+Lasso & 0.0312 & 0.0248 \\ \hline 
+Ridge & 0.0281 & 0.1174 \\ \hline 
+Elastic-Net & 0.0311 & 0.0352 \\ \hline 
+Group Lasso & 0.0278 & 0.1365 \\ \hline 
+OLS Multi-Linear Reg & 0.0684 & 0.0023 \\ \hline 
+\end{tabular}
+
+
+
+\noindent Table 4: Compares all of the models in terms of RMSE and r-squared, which aids in evaluating each model's performance. The soil dataset was split into two groups: training and testing. Our model used the training set to learn the patterns in the dataset and the testing set to see how accurate it was. After training, the models were tested for the test sample, and the predictions were compared to the actual test data, from which the RMSE and R-squared errors were calculated. Table 4 reveals that the OLS MLR performed the worst in this situation, with the largest RMSE and lowest R2, indicating that it could not fit the data well and that linear regression could not punish the features as effectively as other models. Lasso regression outperformed OLS MLR scoring, with RMSE of 0.0312 and R2 of 0.0248, both acceptable values. In this situation, Elastic-Net came in third with an RMSE of 0.0311 and an R2 of 0.0352, which are similar enough values and somewhat better outcomes than the lasso.
+
+\noindent Furthermore, we have the Ridge regression, which penalizes features to some amount but not to 0 as the lasso does, ensuring that each feature provides meaningful information to the model. As can be seen, ridge outperforms the results of the previously stated models with an RMSE of 0.0281 and an R2 of 0.1174; this is the lowest RMSE figure and the highest R2 value to date. Next, we have the Group Lasso, a special case of OSCAR that performs the grouping of features such as gene groups. This model performs the best for our soil dataset, with the lowest RMSE of 0.0278 and the highest R2 of 0.1365, indicating that grouping improves the model's accuracy and yields the lowest values of errors.
+
+\noindent \textbf{Conclusion}
+
+\noindent We explored various approaches to deal with high-dimensional data in this study, and we compared them using simulation and soil datasets. We discovered that grouping had a significant impact on model correctness and error reduction. For the core projection step, we first looked at the properties of all the algorithms and how they function to come up with the best possible answer and which technique outperforms the others and why. OSCAR is a competitive regularize for classification and regression problems, with the extra capability of automatic feature aggregation, as computed and illustrated in the experiments.
+
+\noindent \textbf{Acknowledgements}
+
+\noindent 
+
+\noindent 
+
+\noindent 
+
+\noindent 
+
+\noindent 
+
+\noindent 
+
+\noindent 
+
+\noindent 
+
+\noindent 
+
+\noindent 
+
+\noindent 
+
+\noindent 
+
+\noindent 
+
+\noindent 
+
+\noindent 
+
+\noindent 
+
+\noindent 
+
+\noindent 
+
+\noindent 
+
+\noindent 
+
+\noindent \textbf{References}
+
+\noindent [1] Tibshirani, R. Regression shrinkage and selection via the lasso. Journal of the Royal Statistical Society, Series B, 58\eqref{GrindEQ__1_}:267--288, 1996\textbf{}
+
+\noindent [2] Shen, X. and Huang, H.C. Grouping pursuit through a regularization solution surface. Journal of the American Statistical Association, 105\eqref{GrindEQ__490_}:727--739, 2010\textbf{}
+
+\noindent [3] Jornsten, R. and Yu, B. Simultaneous gene clustering and subset selection for sample classification via MDL. Bioinformatics, 19\eqref{GrindEQ__9_}:1100--1109, 2003\textbf{}
+
+\noindent [4] Dettling, M. and Buhlmann, B. Finding predictive gene groups from microarray data. Journal of  Multivariate Analysis, 90\eqref{GrindEQ__1_}:106--131, 2004.\textbf{}
+
+\noindent [5] Zou, H. and Hastie, T. Regularization and variable selection via the elastic net. Journal of the Royal  Statistical Society. Series B, 67\eqref{GrindEQ__2_}:301, 2005\textbf{}
+
+\noindent [6] Tibshirani, R., Saunders, M., Rosset, S., Zhu, J., and Knight, K. Sparsity and smoothness via the fused lasso. Journal of the Royal Statistical Society, Series B, 67\eqref{GrindEQ__1_}:91--108, 2005.\textbf{}
+
+\noindent [7] Yuan, M. and Lin, Y. Model selection and estimation in regression with grouped variables. Journal of the Royal Statistical Society: Series B, 68\eqref{GrindEQ__1_}:49-- 67, 2006. \textbf{}
+
+\noindent [8] Bondell, H.D. and Reich, B.J. Simultaneous regression shrinkage, variable selection and clustering of predictors with OSCAR. Biometrics, 64\eqref{GrindEQ__1_}:115, 2008. \textbf{}
+
+\noindent [9] Leon Wenliang Zhong, James T. Kwok: Efficient Sparse Modeling with Automatic Feature Grouping.
+
+\noindent [10] Efron, B., Hastie, T., Johnstone, I., and Tibshirani, R. (2004). Least angle regression. Annals of Statistics 32, 407--499.\textbf{}
+
+\noindent [11] Bakin, S. (1999) Adaptive regression and model selection in data mining problems. PhD Thesis. Australian National University, Canberra
+
+\noindent [12] Fu, W. J. (1999) Penalized regressions: the bridge versus the lasso. J. Comput. Graph. Statist., 7, 397--416
+
+\noindent [13] Hoerl, A. E. and Kennard, R. (1970) Ridge regression: biased estimation for nonorthogonal problems. Technometrics, 12, 55--67
+
+\noindent [14] Wold, H. (1975) Soft modelling by latent variables: the nonlinear iterative partial least squares (NIPALS) approach. In Perspectives in Probability and Statistics, in Honor of M. S. Bartlett, pp. 117--144
+
+\noindent [15] Chen, S. S., Donoho, D. L. and Saunders, M. A. (2001) Atomic decomposition by basis pursuit. SIAM Rev., 43, 129--159
+
+\noindent [16] Land, S. and Friedman, J. (1996) Variable fusion: a new method of adaptive signal regression. Technical Report. Department of Statistics, Stanford University, Stanford.
+
+\noindent [17] Lin, Y. and Zhang, H. H. (2003) Component selection and smoothing in smoothing spline analysis of variance models. Technical Report 1072. Department of Statistics, University of Wisconsin, Madison. (Available from http://www.stat.wisc.edu$\mathrm{\sim }$yilin/.)
+
+\noindent [18] Hoerl, A. and Kennard, R. (1988) Ridge regression. In Encyclopedia of Statistical Sciences, vol. 8, pp. 129--136. New York: Wiley.
+
+\noindent [19] Breiman, L. (1996) Heuristics of instability and stabilization in model selection. Ann. Statist., 24, 2350--2383.
+
+\noindent [20] McKeen, S. A., Wilczak, J., Grell, G., Djalalova, I., Peckham, S., Hsie, E., Gong, W., Bouchet, V., Menard, S., Moffet, R., McHenry, J., McQueen, J., Tang, Y., Carmichael, G. R., Pagowski, M., Chan, A., Dye, T., Frost, G., Lee, P., and Mathur, R.: Assessment of an ensemble of seven realtime ozone forecasts over eastern North America during the summer of 2004, J. Geophys. Res., 110, D21307, doi:10.1029/2005JD005858, 2005.
+
+\noindent [21] Savage, N. H., Agnew, P., Davis, L. S., Ord\'{o}\~{n}ez, C., Thorpe, R., Johnson, C. E., O'Connor, F. M., and Dalvi, M.: Air quality modelling using the Met Office Unified Model (AQUM OS24-26): model description and initial evaluation, Geosci. Model Dev., 6, 353--372, doi:10.5194/gmd-6-353-2013, 2013.
+
+\noindent [22] Chai, T., Kim, H.-C., Lee, P., Tong, D., Pan, L., Tang, Y., Huang, J., McQueen, J., Tsidulko, M., and Stajner, I.: Evaluation of the United States National Air Quality Forecast Capability experimental real-time predictions in 2010 using Air Quality System ozone and NO2 measurements, Geosci. Model Dev., 6, 1831-- 1850, doi:10.5194/gmd-6-1831-2013, 2013.
+
+\noindent 
+
+
+\end{document}
+
