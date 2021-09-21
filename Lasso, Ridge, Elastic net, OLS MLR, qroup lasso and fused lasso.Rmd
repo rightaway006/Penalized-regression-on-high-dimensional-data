@@ -1,0 +1,566 @@
+---
+title: "Lasso regression"
+output: pdf_document
+---
+
+```{r}
+# Load the Libraries 
+library(glmnet)
+library(corrplot)
+library(caret)
+library(ggplot2)
+library(pheatmap)
+```
+
+```{r}
+# Load the Soil Dataset
+data = read.csv("C:\\Users\\sarmad\\Desktop\\soil.csv",header=TRUE)
+```
+
+```{r}
+# Check for the structure of the dataset 
+# Check for the type of the features or variables
+str(data)
+```
+
+```{r}
+# Having a look at the quartiles of different features of our dataset
+summary(data)
+```
+
+```{r}
+# Used to see the correlation between different features
+M = cor(data)
+corrplot(M, method = 'number')
+corrplot(M, method = 'color', order = 'alphabet') 
+```
+
+```{r}
+HM <- data.matrix(data)
+HM <- heatmap(HM, Rowv=NA, Colv=NA, col = cm.colors(256), scale="column", margins=c(5,10))
+
+```
+```{r}
+d <- as.matrix(data)
+
+# Default Heatmap
+heatmap(d)
+```
+
+
+```{r}
+heatmap(d, Colv = NA, Rowv = NA, scale="column")
+```
+```{r}
+pheatmap(d, cutree_rows = 4)
+```
+
+```{r}
+# Set seed
+set.seed(123)
+
+# Partition and create index matrix of selected values
+index <- createDataPartition(data$Diversity, p=0.8, list = FALSE, times = 1)
+
+# Converting data to dataframe object
+df <- as.data.frame(data)
+
+# Create Train and Test dataframes
+train_data <- df[index,]
+test_data <- df[-index,]
+```
+
+```{r}
+# k-fold cross validation (10 Folds) 
+
+Control_specifications <- trainControl(method = "cv", number = 5,
+                                       savePredictions = "all")
+```
+
+```{r}
+# Specify and train LASSO Regression Model
+
+# Create a vector of potential lambda values
+lambda_vector <- 10^seq(5, -5, length=500)
+
+# Set seed
+set.seed(111)
+
+# Specify LASSO Regression Model to be estimated using training data
+model1 <- train(Diversity ~ .,
+                data = train_data,
+                preProcess=c("center","scale"),
+                method="glmnet",
+                tuneGrid=expand.grid(alpha=1, lambda=lambda_vector),
+                trControl=Control_specifications,
+                na.action=na.omit)
+```
+```{r}
+plot(model1)
+```
+
+```{r}
+# Best optimal tuning parameter (alpha, lambda)
+model1$bestTune
+```
+
+```{r}
+# Best optimal tuning parameter lambda
+model1$bestTune$lambda
+```
+
+```{r}
+# LASSO Regression Model Coefficients (Parameter Selection)
+# Features with " . " have shrinked 
+coef(model1$finalModel, model1$bestTune$lambda)
+```
+
+
+```{r}
+# Rounding off for better visualization
+round(coef(model1$finalModel, model1$bestTune$lambda), 3)
+```
+
+```{r}
+# Plotting Log(lambda) & RMSE
+plot(log(model1$results$lambda),
+     model1$results$RMSE,
+     xlab = "log(lambda)",
+     ylab = "RMSE")
+```
+
+```{r}
+# Plotting Log(lambda) & RMSE
+plot(log(model1$results$lambda),
+     model1$results$RMSE,
+     xlab = "log(lambda)",
+     ylab = "RMSE",
+     xlim = c(-11,-3))
+```
+
+```{r}
+# Variable Importance
+varImp(model1)
+```
+
+```{r}
+# Data Visualization of Variable Importance
+ggplot(varImp(model1))
+```
+
+```{r}
+# Model Prediction 
+predictions1 <- predict(model1, newdata = test_data)
+predictions1
+```
+
+```{r}
+# Model Performance & Accuracy
+Model_performance <- data.frame(RMSE=RMSE(predictions1, test_data$Diversity),
+                                Rsquared=R2(predictions1, test_data$Diversity))
+Model_performance
+```
+
+```{r}
+# Compare OLS Multiple Linear Regression to LASSO Regression Model
+
+set.seed(222)
+
+# Specify OLS MLR model to be estimated using train data
+# 10 fold Cross Validation
+model2 <- train(Diversity ~ .,
+                data = train_data,
+                preProcess=c("center","scale"),
+                method="lm",
+                trControl=Control_specifications,
+                na.action=na.omit)
+```
+
+
+```{r}
+print(model2)
+```
+```{r}
+summary(model2)
+```
+```{r}
+varImp(model2)
+```
+
+
+```{r}
+ggplot(varImp(model2))
+```
+
+
+```{r}
+model2$finalModel$coefficients
+```
+
+```{r}
+round(model2$finalModel$coefficients, 3)
+```
+
+
+```{r}
+# Compare Model performances of k fold cross validation on train data
+model_list <- list(model1, model2)
+resamp <- resamples(model_list)
+summary(resamp)
+```
+```{r}
+# Compare Models using paired samples (one sample) t-test
+compare_models(model1, model2, metric = "RMSE")
+```
+
+```{r}
+# Comparison
+compare_models(model1, model2, metric = "Rsquared")
+```
+
+```{r}
+# Predict Outcome on test data
+predictions2 <- predict(model2, newdata = test_data)
+predictions2
+```
+
+```{r}
+# Model Performance & Accuracy
+Model_performance2 <- data.frame(RMSE=RMSE(predictions2, test_data$Diversity),
+                                Rsquared=R2(predictions2, test_data$Diversity))
+Model_performance2
+```
+
+
+```{r}
+# Comparison of RMSE and R-square error for LASSO & OLS Multi Linear Regression models 
+comp <- matrix(c(Model_performance$RMSE, Model_performance$Rsquared,
+                 Model_performance2$RMSE, Model_performance2$Rsquared),
+               ncol = 2, byrow = TRUE)
+colnames(comp) <- c("RMSE", "R-square")
+rownames(comp) <- c("LASSO Regression", "OLS Multi Linear Reg")
+comp
+```
+
+```{r}
+# Comparison of RMSE and R-square error for LASSO & OLS Multi Linear Regression models 
+comp <- as.table(comp)
+round(comp, 3)
+
+```
+
+
+```{r}
+# Set seed
+set.seed(333)
+
+# Specify Ridge Regression Model to be estimated using training data
+model3 <- train(Diversity ~ .,
+                data = train_data,
+                preProcess=c("center","scale"),
+                method="glmnet",
+                tuneGrid=expand.grid(alpha=0, lambda=lambda_vector),
+                trControl=Control_specifications,
+                na.action=na.omit)
+```
+
+
+```{r}
+plot(model3)
+```
+
+```{r}
+# Best optimal tuning parameter (alpha, lambda)
+model3$bestTune
+```
+
+```{r}
+# Best optimal tuning parameter lambda
+model3$bestTune$lambda
+```
+
+```{r}
+# Ridge Regression Model Coefficients (Parameter Selection)
+# Features with " . " have shrinked
+# No varible is shrinked to zero in this case
+coef(model3$finalModel, model3$bestTune$lambda)
+```
+
+
+```{r}
+# Rounding off for better visualization
+round(coef(model3$finalModel, model3$bestTune$lambda), 3)
+```
+
+```{r}
+# Plotting Log(lambda) & RMSE
+plot(log(model3$results$lambda),
+     model3$results$RMSE,
+     xlab = "log(lambda)",
+     ylab = "RMSE")
+```
+
+```{r}
+# Plotting Log(lambda) & RMSE
+plot(log(model3$results$lambda),
+     model3$results$RMSE,
+     xlab = "log(lambda)",
+     ylab = "RMSE",
+     xlim = c(-5,5))
+```
+
+```{r}
+# Variable Importance
+varImp(model3)
+```
+
+```{r}
+# Data Visualization of Variable Importance
+ggplot(varImp(model3))
+```
+
+```{r}
+# Model Prediction 
+predictions3 <- predict(model3, newdata = test_data)
+predictions3
+```
+
+```{r}
+# Model Performance & Accuracy
+Model_performance3 <- data.frame(RMSE=RMSE(predictions3, test_data$Diversity),
+                                Rsquared=R2(predictions3, test_data$Diversity))
+Model_performance3
+```
+
+
+
+```{r}
+# Set seed
+set.seed(444)
+
+# Specify Elastic-Net Regression Model to be estimated using training data
+model4 <- train(Diversity ~ .,
+                data = train_data,
+                preProcess=c("center","scale"),
+                method="glmnet",
+                tuneGrid=expand.grid(alpha=0.5, lambda=lambda_vector),
+                trControl=Control_specifications,
+                na.action=na.omit)
+```
+
+
+```{r}
+plot(model4)
+```
+
+```{r}
+# Best optimal tuning parameter (alpha, lambda)
+model4$bestTune
+```
+
+```{r}
+# Best optimal tuning parameter lambda
+model4$bestTune$lambda
+```
+
+```{r}
+# Elastic-Net Regression Model Coefficients (Parameter Selection)
+# Features with " . " have shrinked 
+coef(model4$finalModel, model4$bestTune$lambda)
+```
+
+
+```{r}
+# Rounding off for better visualization
+round(coef(model4$finalModel, model4$bestTune$lambda), 3)
+```
+
+```{r}
+# Plotting Log(lambda) & RMSE
+plot(log(model4$results$lambda),
+     model4$results$RMSE,
+     xlab = "log(lambda)",
+     ylab = "RMSE")
+```
+
+```{r}
+# Plotting Log(lambda) & RMSE
+plot(log(model4$results$lambda),
+     model4$results$RMSE,
+     xlab = "log(lambda)",
+     ylab = "RMSE",
+     xlim = c(-11,-3))
+```
+
+```{r}
+# Variable Importance
+varImp(model4)
+```
+
+```{r}
+# Data Visualization of Variable Importance
+ggplot(varImp(model4))
+```
+
+```{r}
+# Model Prediction 
+predictions4 <- predict(model4, newdata = test_data)
+predictions4
+```
+
+```{r}
+# Model Performance & Accuracy
+Model_performance4 <- data.frame(RMSE=RMSE(predictions4, test_data$Diversity),
+                                Rsquared=R2(predictions4, test_data$Diversity))
+Model_performance4
+```
+
+
+
+
+```{r}
+#  Comparison of RMSE and R-square error for LASSO, OLS Multi Linear Regression model, RIDGE Regression and Elastic-Net Regression.
+comp2 <- matrix(c(Model_performance$RMSE, Model_performance$Rsquared,
+                 Model_performance2$RMSE, Model_performance2$Rsquared,
+                 Model_performance3$RMSE, Model_performance3$Rsquared,
+                 Model_performance4$RMSE, Model_performance4$Rsquared),
+               ncol = 2, byrow = TRUE)
+colnames(comp2) <- c("RMSE", "R-square")
+rownames(comp2) <- c("LASSO Regression", "OLS Multi Linear Reg", "RIDGE Regression", "Elastic-Net Regression")
+comp2
+```
+
+```{r}
+# Comparison of RMSE and R-square error for LASSO, OLS Multi Linear Regression model, RIDGE Regression and Elastic-Net Regression.
+comp2 <- as.table(comp2)
+round(comp2, 3)
+
+```
+
+```{r}
+library(grpreg)
+group1 <- rep(1:5, each=3)
+group1
+```
+
+```{r}
+fit <- grpreg(train_data[1:15], train_data$Diversity, group1, penalty = "grLasso")
+plot(fit)
+```
+```{r}
+plot(fit, xlim = c(0.006,0))
+```
+
+
+
+```{r}
+coef(fit, lambda = 0.01)
+```
+
+```{r}
+cvfit <- cv.grpreg(train_data[1:15], train_data$Diversity, group1, penalty = "grLasso")
+plot(cvfit)
+```
+
+```{r}
+plot(cvfit, xlim = c(-4,-8))
+```
+
+```{r}
+coef(fit)
+```
+
+
+```{r}
+coef(cvfit)
+```
+```{r}
+round(coef(cvfit), 3)
+```
+
+
+```{r}
+summary(cvfit)
+```
+
+```{r}
+coef(cvfit)
+```
+```{r}
+cvfit$lambda.min
+```
+
+```{r}
+predictions5 <- predict(fit, as.matrix(test_data[,1:15]), type = "response", lambda = cvfit$lambda.min)
+predictions5
+```
+
+```{r}
+Model_performance5 <- data.frame(RMSE=RMSE(predictions5, test_data$Diversity),
+                                Rsquared=R2(predictions5, test_data$Diversity))
+Model_performance5
+```
+
+
+
+```{r}
+library(extlasso)
+```
+
+
+```{r}
+fit2 <- fusedlasso(as.matrix(train_data[1:15]), as.matrix(train_data$Diversity), lambda1 = 0.1, lambda2 = 1)
+```
+
+```{r}
+coef(fit2)
+```
+```{r}
+round(coef(fit2), 3)
+```
+
+
+```{r}
+str(fit2)
+```
+
+
+```{r}
+# Comparison of RMSE and R-square error for LASSO, OLS Multi Linear Regression model, RIDGE Regression, Elastic-Net Regression and Group Lasso. 
+comp2 <- matrix(c(Model_performance$RMSE, Model_performance$Rsquared,
+                 Model_performance2$RMSE, Model_performance2$Rsquared,
+                 Model_performance3$RMSE, Model_performance3$Rsquared,
+                 Model_performance4$RMSE, Model_performance4$Rsquared,
+                 Model_performance5$RMSE, Model_performance5$Rsquared),
+               ncol = 2, byrow = TRUE)
+colnames(comp2) <- c("RMSE", "R-square")
+rownames(comp2) <- c("LASSO Regression", "OLS Multi Linear Reg", "RIDGE Regression", "Elastic-Net Regression", "Group Lasso")
+comp2
+```
+
+```{r}
+# Comparison of RMSE and R-square error for LASSO, OLS Multi Linear Regression model, RIDGE Regression, Elastic-Net Regression and Group Lasso.
+comp2 <- as.table(comp2)
+round(comp2, 4)
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

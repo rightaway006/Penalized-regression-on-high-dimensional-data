@@ -1,0 +1,79 @@
+---
+title: "Simulation 2"
+author: 'NULL'
+date: "8/24/2021"
+output: pdf_document
+---
+
+```{r}
+set.seed(123)    
+library(glmnet)  
+library(dplyr)   
+library(psych)   
+
+data = read.csv("C:\\Users\\sarmad\\Desktop\\data.csv", header = TRUE)
+
+y <- data %>% select(target) %>% scale(center = TRUE, scale = FALSE) %>% as.matrix()
+X <- data %>% select(-target) %>% as.matrix()
+
+lambdas_to_try <- 10^seq(-3, 5, length.out = 100)
+
+ridge_cv <- cv.glmnet(X, y, alpha = 0, lambda = lambdas_to_try,standardize = TRUE, nfolds = 5)
+plot(ridge_cv)
+
+ridge_cv <- cv.glmnet(X, y, alpha = 1, lambda = lambdas_to_try,standardize = TRUE, nfolds = 5)
+plot(ridge_cv)
+
+ridge_cv <- cv.glmnet(X, y, alpha = 0.5, lambda = lambdas_to_try,standardize = TRUE, nfolds = 5)
+plot(ridge_cv)
+```
+
+```{r}
+lambda_cv <- ridge_cv$lambda.min
+model_cv <- glmnet(X, y, alpha = 0, lambda = lambda_cv, standardize = TRUE)
+y_hat_cv <- predict(model_cv, X)
+ssr_cv <- t(y - y_hat_cv) %*% (y - y_hat_cv)
+rsq_ridge_cv <- cor(y, y_hat_cv)^2
+
+X_scaled <- scale(X)
+aic <- c()
+bic <- c()
+for (lambda in seq(lambdas_to_try)) {
+  model <- glmnet(X, y, alpha = 0, lambda = lambdas_to_try[lambda], standardize = TRUE)
+  betas <- as.vector((as.matrix(coef(model))[-1, ]))
+  resid <- y - (X_scaled %*% betas)
+  ld <- lambdas_to_try[lambda] * diag(ncol(X_scaled))
+  H <- X_scaled %*% solve(t(X_scaled) %*% X_scaled + ld) %*% t(X_scaled)
+  df <- tr(H)
+  # Compute information criteria
+  aic[lambda] <- nrow(X_scaled) * log(t(resid) %*% resid) + 2 * df
+  bic[lambda] <- nrow(X_scaled) * log(t(resid) %*% resid) + 2 * df * log(nrow(X_scaled))
+}
+
+lambda_aic <- lambdas_to_try[which.min(aic)]
+lambda_bic <- lambdas_to_try[which.min(bic)]
+
+model_aic <- glmnet(X, y, alpha = 0, lambda = lambda_aic, standardize = TRUE)
+y_hat_aic <- predict(model_aic, X)
+ssr_aic <- t(y - y_hat_aic) %*% (y - y_hat_aic)
+rsq_ridge_aic <- cor(y, y_hat_aic)^2
+
+model_bic <- glmnet(X, y, alpha = 0, lambda = lambda_bic, standardize = TRUE)
+y_hat_bic <- predict(model_bic, X)
+ssr_bic <- t(y - y_hat_bic) %*% (y - y_hat_bic)
+rsq_ridge_bic <- cor(y, y_hat_bic)^2
+
+res <- glmnet(X, y, alpha = 0, lambda = lambdas_to_try, standardize = FALSE)
+plot(res, xvar = "lambda")
+legend("bottomright", lwd = 1, col = 1:6, legend = colnames(X), cex = .7)
+
+res <- glmnet(X, y, alpha = 1, lambda = lambdas_to_try, standardize = FALSE)
+plot(res, xvar = "lambda")
+legend("bottomright", lwd = 1, col = 1:6, legend = colnames(X), cex = .7)
+
+res <- glmnet(X, y, alpha = 0.5, lambda = lambdas_to_try, standardize = FALSE)
+plot(res, xvar = "lambda")
+legend("bottomright", lwd = 1, col = 1:6, legend = colnames(X), cex = .7)
+```
+
+
